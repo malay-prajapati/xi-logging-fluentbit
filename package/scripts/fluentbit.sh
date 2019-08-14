@@ -1011,7 +1011,7 @@ if [ "$?" -ne "0" ]; then
   exit 1
 fi
 
-cat <<EOF >> $DIR/fluentbit.conf
+cat <<EOF >> $DIR/parsers.conf
 [PARSER]
     Name   hermes_regex
     Format regex
