@@ -3,13 +3,6 @@ DIR="/etc/rsyslog.d"
 RSYSLOG_PID_DIR="/home/nutanix/RSYSLOG"
 PID_FILE="/home/nutanix/RSYSLOG/deploy_rsyslog.sh.pid"
 
-if [[ ! -e $RSYSLOG_PID_DIR ]]; then
-    mkdir $RSYSLOG_PID_DIR
-elif [[ -d $RSYSLOG_PID_DIR ]]; then
-    echo "$RSYSLOG_PID_DIR already exists already." 1>&2
-    exit 1
-fi
-
 #Handle previously running processes for the curent script
 if [[ -e $PID_FILE]]; then
     for pid in $(pidof -x deploy_rsyslog.sh); do
@@ -20,6 +13,15 @@ if [[ -e $PID_FILE]]; then
                 echo "Process is not getting terminated" 1>&2
                 exit 1
             fi
+    # clean up the contents of the previously existing dir
+    `rm -rf $RSYSLOG_PID_DIR`
+
+if [[ ! -e $RSYSLOG_PID_DIR ]]; then
+    mkdir $RSYSLOG_PID_DIR
+elif [[ -d $RSYSLOG_PID_DIR ]]; then
+    echo "$RSYSLOG_PID_DIR already exists already." 1>&2
+    exit 1
+fi
 
 # Delete pidfile during system exits
 trap "rm -f -- '$PID_FILE'" EXIT

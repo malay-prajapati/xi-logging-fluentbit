@@ -21,14 +21,6 @@ XIC_AZ=`zeus_config_printer | grep "cell_fqdn_list" | awk {'print $2'} |  sed 's
 XIC_NAME=`zeus_config_printer | grep "cluster_name" | awk {'print $2'} |  sed 's/"//g'`
 XIC_ID=`zeus_config_printer | grep "cluster_uuid" | awk {'print $2'} |  sed 's/"//g' | uniq`
 
-# Create a secondary fluent-bit instance directory if not exist 
-if [[ ! -e $DIR ]]; then
-    mkdir $DIR
-elif [[ -d $DIR ]]; then
-    echo "$DIR already exists already." 1>&2
-    exit 1
-fi
-
 #Handle previously running processes for the curent script
 if [[ -e $PID_FILE]]; then
     for pid in $(pidof -x automated_fluentbit.sh); do
@@ -39,6 +31,16 @@ if [[ -e $PID_FILE]]; then
                 echo "Process is not getting terminated" 1>&2
                 exit 1
             fi
+    # clean up the contents of the previously existing dir
+    `rm -rf $DIR`
+
+# Create a secondary fluent-bit instance directory if not exist 
+if [[ ! -e $DIR ]]; then
+    mkdir $DIR
+elif [[ -d $DIR ]]; then
+    echo "$DIR already exists already." 1>&2
+    exit 1
+fi
 
 # Delete pidfile during system exits
 trap "rm -f -- '$PID_FILE'" EXIT
