@@ -22,7 +22,6 @@ XIC_ID=`zeus_config_printer | grep "cluster_uuid" | awk {'print $2'} |  sed 's/"
 
 #Handle previously running processes for the curent script
 for pid in $(ps -aux | less | grep -i home/nutanix/fluentbi[t] | awk {'print $2'}); do
-    #if [ $pid != $$ ]; then
     echo "killing the already running process with PID $pid"
     `kill $pid`
     # clean up the contents of the previously existing dir
