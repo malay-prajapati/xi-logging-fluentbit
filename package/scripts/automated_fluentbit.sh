@@ -24,12 +24,12 @@ XIC_ID=`zeus_config_printer | grep "cluster_uuid" | awk {'print $2'} |  sed 's/"
 for pid in $(ps -aux | less | grep -i home/nutanix/fluentbi[t] | awk {'print $2'}); do
     echo "killing the already running process with PID $pid"
     `kill $pid`
-    # clean up the contents of the previously existing dir
-    `rm -rf $DIR`
     if [ "$?" -ne "0" ]; then
         echo "Process is not getting terminated" 1>&2
         exit 1
     fi
+    # clean up the contents of the previously existing dir
+    `rm -rf $DIR`
 done
 
 # Create a secondary fluent-bit instance directory if not exist
