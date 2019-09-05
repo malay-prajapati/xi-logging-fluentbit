@@ -15,6 +15,7 @@ if [[ -e $PID_FILE]]; then
             fi
     # clean up the contents of the previously existing dir
     `rm -rf $RSYSLOG_PID_DIR`
+fi
 
 if [[ ! -e $RSYSLOG_PID_DIR ]]; then
     mkdir $RSYSLOG_PID_DIR

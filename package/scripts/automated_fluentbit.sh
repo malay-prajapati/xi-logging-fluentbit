@@ -8,7 +8,6 @@ fi
 USER="nutanix"
 DIR="/home/nutanix/fluentbit"
 BINARY="/home/nutanix/ncc/bin/nusights/fluent-bit"
-PID_FILE="/home/nutanix/fluentbit/automated_fluentbit.sh.pid"
 
 FLUENTD_HOST="abfb4518bbb0011e984e802c19fbe058-2098409646.us-west-2.elb.amazonaws.com"
 FLUENTD_PORT="24224"
@@ -22,31 +21,25 @@ XIC_NAME=`zeus_config_printer | grep "cluster_name" | awk {'print $2'} |  sed 's
 XIC_ID=`zeus_config_printer | grep "cluster_uuid" | awk {'print $2'} |  sed 's/"//g' | uniq`
 
 #Handle previously running processes for the curent script
-if [[ -e $PID_FILE]]; then
-    for pid in $(pidof -x automated_fluentbit.sh); do
-        if [ $pid != $$ ]; then
-            echo "killing the already running process with PID $pid"
-            `kill $pid`
-            if [ "$?" -ne "0" ]; then
-                echo "Process is not getting terminated" 1>&2
-                exit 1
-            fi
+for pid in $(ps -aux | less | grep -i home/nutanix/fluentbi[t] | awk {'print $2'}); do
+    #if [ $pid != $$ ]; then
+    echo "killing the already running process with PID $pid"
+    `kill $pid`
     # clean up the contents of the previously existing dir
     `rm -rf $DIR`
+    if [ "$?" -ne "0" ]; then
+        echo "Process is not getting terminated" 1>&2
+        exit 1
+    fi
+done
 
-# Create a secondary fluent-bit instance directory if not exist 
+# Create a secondary fluent-bit instance directory if not exist
 if [[ ! -e $DIR ]]; then
     mkdir $DIR
 elif [[ -d $DIR ]]; then
     echo "$DIR already exists already." 1>&2
     exit 1
 fi
-
-# Delete pidfile during system exits
-trap "rm -f -- '$PID_FILE'" EXIT
-
-# Save the process id in the pid file
-echo $$ > "$PID_FILE"
 
 # Copy fluentbit to the secondary fluent-bit instance directory
 `/bin/cp -r $BINARY $DIR/`
@@ -1149,8 +1142,4 @@ if [ "$?" -ne "0" ]; then
 fi
 
 # Start the secondary fluent-bit instance
-`$DIR/fluent-bit -c $DIR/fluentbit.conf &`
-if [ "$?" -ne "0" ]; then
-  echo "Sorry, couldn't perform start the process on this vm" 1>&2
-  exit 1
-fi
+nohup $DIR/fluent-bit -c $DIR/fluentbit.conf &
